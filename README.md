@@ -5,7 +5,11 @@ the free [Vital](https://vital.audio) wavetable synth.
 
 > "Make a dark reese bass with two detuned saws, a ladder filter at 400 Hz and a slow LFO on the cutoff. Put the LFO rate on macro 1."
 
-![A session building a Blinding Lights style lead: create, render, fix, render again](docs/demo.gif)
+![Claude Desktop building a Blinding Lights style lead: create, listen, fix, listen again](docs/demo-desktop.gif)
+
+The preset it made, opened in Vital inside Ableton (click to watch with sound):
+
+[![Blinding Lead playing in Vital inside Ableton](docs/ableton-vital.jpg)](docs/ableton-vital.mp4)
 
 ## Tools
 
@@ -51,6 +55,8 @@ of the two.
 
 These need [uv](https://docs.astral.sh/uv/). `uvx` downloads and runs the server
 straight from GitHub, no clone needed.
+
+![The same session in a terminal, with the raw tool calls](docs/demo.gif)
 
 **Claude Code**
 ```bash
@@ -139,6 +145,7 @@ uv sync --extra render   # include DawDreamer so the real-plugin render test run
 uv run python tools/build_mcpb.py   # build both Claude Desktop extensions into dist/
 uv run python tools/gen_schema.py   # regenerate schema.json from Vital's GitHub source
 uv run --no-project --with pillow python tools/make_demo_gif.py [render.wav]   # redraw docs/demo.gif
+uv run --no-project --with pillow python tools/make_desktop_gif.py [first.wav second.wav]   # docs/demo-desktop.gif
 ```
 
 ## License
