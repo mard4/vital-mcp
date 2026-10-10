@@ -82,6 +82,35 @@ def frame_from_spec(spec):
     return normalize(wave)
 
 
+def spec_name(spec):
+    """Readable name for a frame spec, e.g. "Saw", "Pulse 40%", "Saw + Sine Drive 3"."""
+    if isinstance(spec, str):
+        spec = {"shape": spec}
+    if "shape" in spec:
+        name = spec["shape"].title()
+        if spec["shape"] == "pulse":
+            name += f" {round(spec.get('width', 0.5) * 100)}%"
+    elif "harmonics" in spec:
+        name = "Additive"
+    elif "samples" in spec:
+        name = "Custom"
+    elif "mix" in spec:
+        name = " + ".join(spec_name(s) for s in spec["mix"])
+    else:
+        name = "Wave"
+    for key in ("drive", "fold"):
+        if spec.get(key):
+            name += f" {key.title()} {spec[key]:g}"
+    return name
+
+
+def table_name(frames):
+    """Name for a table built from frame specs: one frame or "First > Last"."""
+    if len(frames) == 1:
+        return spec_name(frames[0])
+    return f"{spec_name(frames[0])} > {spec_name(frames[-1])}"
+
+
 def normalize(wave):
     wave = wave - wave.mean()
     peak = np.max(np.abs(wave))

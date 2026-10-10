@@ -65,6 +65,16 @@ def test_wavetable_encoding():
     assert np.isclose(np.max(np.abs(wave)), 1.0, atol=1e-3)
 
 
+def test_wavetable_names():
+    assert W.table_name(["saw"]) == "Saw"
+    assert W.table_name([{"shape": "pulse", "width": 0.4}]) == "Pulse 40%"
+    assert W.table_name([{"mix": ["saw", "sine"], "drive": 3}]) == "Saw + Sine Drive 3"
+    assert W.table_name(["sine", {"harmonics": [1, 0.5]}, "square"]) == "Sine > Square"
+    p = V.init_preset("Names")
+    assert V.set_wavetable(p, 2, {"shape": "pulse", "width": 0.4}).startswith("Pulse 40%:")
+    assert V.set_wavetable(p, 3, {"frames": ["saw"], "name": "Mine"}).startswith("Mine:")
+
+
 def test_create_edit_compare(vital_dir):
     p = V.init_preset("Test")
     V.set_metadata(p, style="Pad", macro_names={"1": "TONE"})

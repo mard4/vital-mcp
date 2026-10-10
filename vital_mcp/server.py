@@ -66,8 +66,13 @@ def _apply_changes(preset, parameters, modulations, clear_modulations, wavetable
     return report, warnings
 
 
-def _result(path, preset, report, warnings):
-    lines = [f"Saved: {path}", ""]
+RELOAD_NEW = ("Vital's preset browser only scans the folder when it opens: close and reopen "
+              "the browser (or click another folder and back) to see this preset.")
+RELOAD_EDIT = "Vital keeps the old version loaded: reselect the preset in its browser to reload it."
+
+
+def _result(path, preset, report, warnings, new_file=True):
+    lines = [f"Saved: {path}", RELOAD_NEW if new_file else RELOAD_EDIT, ""]
     if warnings:
         lines += ["Warnings:"] + [f"- {w}" for w in warnings] + [""]
     if report:
@@ -200,7 +205,7 @@ def edit_preset(
         saved = V.save(data, target, overwrite=False)
     else:
         saved = V.save(data, path, overwrite=True)
-    return _result(saved, data, report, warnings)
+    return _result(saved, data, report, warnings, new_file=bool(save_as))
 
 
 @tool

@@ -245,7 +245,7 @@ def set_wavetable(preset, osc, spec):
         raise ValueError("Oscillator numbers are 1-3")
     if isinstance(spec, (str,)) or (isinstance(spec, dict) and not ({"frames", "morph"} & spec.keys())):
         spec = {"frames": [spec]}
-    name = spec.get("name") or "MCP Table"
+    name = spec.get("name") or W.table_name(spec["morph"] if "morph" in spec else spec["frames"])
     kwargs = {"author": preset.get("author", ""), "version": synth_version()}
     if "morph" in spec:
         table = W.morph(spec["morph"][0], spec["morph"][1], spec.get("steps", 8), name,
