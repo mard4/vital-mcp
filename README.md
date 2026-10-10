@@ -36,7 +36,7 @@ Values outside a parameter's range are clamped and reported, and typos get sugge
 Requires [uv](https://docs.astral.sh/uv/) and Vital 1.5 or newer.
 
 ```bash
-git clone <this repo> vital-mcp
+git clone https://github.com/mard4/vital-mcp.git
 ```
 
 Add it to any MCP client as a stdio server. The usual JSON config looks like this:
