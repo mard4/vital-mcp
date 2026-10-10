@@ -12,6 +12,7 @@ for the preset's and load it back:
 """
 
 import json
+import multiprocessing
 import os
 import platform
 import re
@@ -19,9 +20,13 @@ import struct
 import tempfile
 import time
 import wave
+from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures.process import BrokenProcessPool
 from pathlib import Path
 
 import numpy as np
+
+from .preset import env_setting
 
 SAMPLE_RATE = 44100
 BLOCK_SIZE = 512
@@ -68,7 +73,7 @@ def _plugin_candidates():
 
 def plugin_path():
     """Vital's VST3, from VITAL_PLUGIN_PATH or the standard install folders."""
-    override = os.environ.get("VITAL_PLUGIN_PATH")
+    override = env_setting("VITAL_PLUGIN_PATH")
     if override:
         path = Path(override).expanduser()
         if not path.exists():
@@ -251,19 +256,48 @@ def render(preset, notes="riff", bpm=120.0, tail=DEFAULT_TAIL, transpose=0):
     if seconds > MAX_SECONDS:
         raise ValueError(f"Render would be {seconds:.1f} s; keep it under {MAX_SECONDS:g} s")
 
-    engine, synth = _engine()
-    load_preset(synth, preset)
-    engine.set_bpm(bpm)
-    synth.clear_midi()
-    for note, start, length, velocity in events:
-        synth.add_midi_note(note, velocity, start * beat, length * beat)
-    engine.load_graph([(synth, [])])
-    engine.render(seconds)
-    audio = np.asarray(engine.get_audio(), dtype=np.float64)
+    audio = _run_in_worker(_play, preset, events, bpm, seconds)
     info = {"bpm": bpm, "notes": len(events), "notes_end_sec": round(played, 2),
             "first_note_sec": round(min(e[1] for e in events) * beat, 3),
             "first_note_len_sec": round(min(events, key=lambda e: e[1])[2] * beat, 3)}
     return audio, events, info
+
+
+def _play(preset, events, bpm, seconds):
+    """Runs in the render worker process."""
+    engine, synth = _engine()
+    load_preset(synth, preset)
+    engine.set_bpm(bpm)
+    synth.clear_midi()
+    beat = 60.0 / bpm
+    for note, start, length, velocity in events:
+        synth.add_midi_note(note, velocity, start * beat, length * beat)
+    engine.load_graph([(synth, [])])
+    engine.render(seconds)
+    return np.asarray(engine.get_audio(), dtype=np.float64)
+
+
+# Plugins (JUCE) must be created and driven from a process's main thread, but MCP servers
+# run tools in worker threads. So the plugin lives in a separate process, where tasks run
+# on the main thread; it stays loaded between renders, and a plugin crash can't take the
+# server down.
+_WORKER = {}
+
+
+def _worker_init():
+    # The MCP protocol runs over our stdout; keep anything the plugin prints off it.
+    os.dup2(2, 1)
+
+
+def _run_in_worker(fn, *args):
+    if "pool" not in _WORKER:
+        _WORKER["pool"] = ProcessPoolExecutor(1, mp_context=multiprocessing.get_context("spawn"),
+                                              initializer=_worker_init)
+    try:
+        return _WORKER["pool"].submit(fn, *args).result()
+    except BrokenProcessPool as exc:
+        _WORKER.pop("pool").shutdown(wait=False)
+        raise RenderError("The Vital render process crashed; try again (it restarts on the next render)") from exc
 
 
 def write_wav(audio, path):

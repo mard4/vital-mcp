@@ -115,3 +115,11 @@ def test_render_real_vital():
     dark_stats, bright_stats = R.analyze(dark, info=info), R.analyze(bright, info=info)
     assert not dark_stats["silent"]
     assert bright_stats["spectral_centroid_hz"] > 2 * dark_stats["spectral_centroid_hz"]
+
+
+@pytest.mark.parametrize("value", ["", "  ", "${user_config.vital_plugin_path}"])
+def test_blank_bundle_settings_are_ignored(monkeypatch, value):
+    monkeypatch.setenv("VITAL_PLUGIN_PATH", value)
+    monkeypatch.setenv("VITAL_DATA_DIR", value)
+    assert V.env_setting("VITAL_PLUGIN_PATH") is None
+    assert V.data_dir() != V.Path(value)

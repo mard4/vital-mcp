@@ -63,9 +63,16 @@ def vital_config():
         return {}
 
 
+def env_setting(name):
+    """An environment variable, or None if unset, empty or an unfilled "${user_config...}"
+    placeholder (left by MCP bundle installers when an optional field is blank)."""
+    value = os.environ.get(name, "").strip()
+    return value if value and not value.startswith("${") else None
+
+
 def data_dir():
-    if os.environ.get("VITAL_DATA_DIR"):
-        return Path(os.environ["VITAL_DATA_DIR"]).expanduser()
+    if env_setting("VITAL_DATA_DIR"):
+        return Path(env_setting("VITAL_DATA_DIR")).expanduser()
     configured = vital_config().get("data_directory")
     if configured:
         return Path(configured)
