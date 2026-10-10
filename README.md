@@ -5,6 +5,8 @@ the free [Vital](https://vital.audio) wavetable synth.
 
 > "Make a dark reese bass with two detuned saws, a ladder filter at 400 Hz and a slow LFO on the cutoff. Put the LFO rate on macro 1."
 
+![A session building a Blinding Lights style lead: create, render, fix, render again](docs/demo.gif)
+
 ## Tools
 
 | Tool | What it does |
@@ -38,7 +40,12 @@ You need Vital 1.5 or newer. For rendering (`render_preset`), Vital's VST3 must 
 Download [`vital-mcp.mcpb`](https://github.com/mard4/vital-mcp/releases/latest/download/vital-mcp.mcpb)
 from the latest release and double-click it (or drag it into Claude Desktop's
 Settings > Extensions), then click **Install**. Claude Desktop sets up Python and the
-dependencies itself. Both settings it asks for are optional.
+dependencies itself. The Vital folder setting is optional.
+
+To also listen to presets, install
+[`vital-mcp-render.mcpb`](https://github.com/mard4/vital-mcp/releases/latest/download/vital-mcp-render.mcpb)
+instead (see [Listening to presets](#listening-to-presets-optional)). Install only one
+of the two.
 
 ### Agents with a CLI: one command
 
@@ -47,17 +54,17 @@ straight from GitHub, no clone needed.
 
 **Claude Code**
 ```bash
-claude mcp add -s user vital -- uvx --from "vital-mcp[render] @ git+https://github.com/mard4/vital-mcp" vital-mcp
+claude mcp add -s user vital -- uvx --from "git+https://github.com/mard4/vital-mcp" vital-mcp
 ```
 
 **Codex**
 ```bash
-codex mcp add vital -- uvx --from "vital-mcp[render] @ git+https://github.com/mard4/vital-mcp" vital-mcp
+codex mcp add vital -- uvx --from "git+https://github.com/mard4/vital-mcp" vital-mcp
 ```
 
 **VS Code (Copilot agent mode)**
 ```bash
-code --add-mcp '{"name":"vital","command":"uvx","args":["--from","vital-mcp[render] @ git+https://github.com/mard4/vital-mcp","vital-mcp"]}'
+code --add-mcp '{"name":"vital","command":"uvx","args":["--from","git+https://github.com/mard4/vital-mcp","vital-mcp"]}'
 ```
 
 ### Any other MCP client (Cursor, Windsurf, Gemini CLI, ...)
@@ -69,21 +76,20 @@ Add this to the client's MCP config (`~/.cursor/mcp.json`, `~/.gemini/settings.j
   "mcpServers": {
     "vital": {
       "command": "uvx",
-      "args": ["--from", "vital-mcp[render] @ git+https://github.com/mard4/vital-mcp", "vital-mcp"]
+      "args": ["--from", "git+https://github.com/mard4/vital-mcp", "vital-mcp"]
     }
   }
 }
 ```
 
-Drop `[render]` from the `--from` value to skip the rendering dependency (DawDreamer).
 To pick up a new version, run this once:
 
 ```bash
-uvx --refresh --from "vital-mcp[render] @ git+https://github.com/mard4/vital-mcp" vital-mcp
+uvx --refresh --from "git+https://github.com/mard4/vital-mcp" vital-mcp
 ```
 
 For development, clone the repo and point the client at your checkout:
-`"command": "uv", "args": ["--directory", "/path/to/vital-mcp", "run", "--extra", "render", "vital-mcp"]`.
+`"command": "uv", "args": ["--directory", "/path/to/vital-mcp", "run", "vital-mcp"]`.
 
 ## Where files go
 
@@ -102,8 +108,20 @@ can act on: peak/RMS, clipping, stereo width, energy per band, spectral centroid
 sustain and tail length. Pass `reference` with a WAV to compare against a target sound.
 No DAW or audio routing needed, and it runs faster than real time.
 
-It needs the Vital VST3 installed and the `render` extra, which every install option
-above includes. The plugin is found in the standard VST3 folders; override with `VITAL_PLUGIN_PATH`.
+It's optional because it installs [DawDreamer](https://github.com/DBraun/DawDreamer)
+(about 130 MB) and needs Vital's VST3 installed. To turn it on:
+
+- **Claude Desktop:** install `vital-mcp-render.mcpb` instead of `vital-mcp.mcpb`.
+- **Everything else:** use `"vital-mcp[render] @ git+https://github.com/mard4/vital-mcp"` as the `--from` value in the commands
+  above. For example, in Claude Code:
+
+  ```bash
+  claude mcp add -s user vital -- uvx --from "vital-mcp[render] @ git+https://github.com/mard4/vital-mcp" vital-mcp
+  ```
+
+Without it, the other tools work as usual and `render_preset` explains how to enable it.
+
+The plugin is found in the standard VST3 folders; override with `VITAL_PLUGIN_PATH`.
 Renders go to a temp folder (`vital-mcp/renders`) unless you pass `out_path`.
 
 ## Limits
@@ -118,8 +136,9 @@ Renders go to a temp folder (`vital-mcp/renders`) unless you pass `out_path`.
 ```bash
 uv run pytest            # tests; also parses every preset in your Vital folder
 uv sync --extra render   # include DawDreamer so the real-plugin render test runs
-npx @anthropic-ai/mcpb pack . vital-mcp.mcpb   # build the Claude Desktop extension
+uv run python tools/build_mcpb.py   # build both Claude Desktop extensions into dist/
 uv run python tools/gen_schema.py   # regenerate schema.json from Vital's GitHub source
+uv run --no-project --with pillow python tools/make_demo_gif.py [render.wav]   # redraw docs/demo.gif
 ```
 
 ## License

@@ -11,6 +11,7 @@ for the preset's and load it back:
         <preset JSON> NUL <JUCE private data>     what Vital's getStateInformation wrote
 """
 
+import importlib.util
 import json
 import multiprocessing
 import os
@@ -50,6 +51,13 @@ _NOTE_NAMES = {"c": 0, "d": 2, "e": 4, "f": 5, "g": 7, "a": 9, "b": 11}
 _JUCE_CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+"
 _JUCE_LOOKUP = np.zeros(256, dtype=np.uint8)
 _JUCE_LOOKUP[np.frombuffer(_JUCE_CHARS.encode(), dtype=np.uint8)] = np.arange(64)
+
+
+MISSING_DAWDREAMER = (
+    "Rendering isn't installed. Claude Desktop: install vital-mcp-render.mcpb from "
+    "https://github.com/mard4/vital-mcp/releases/latest instead of vital-mcp.mcpb. Other clients: "
+    "use 'vital-mcp[render] @ git+https://github.com/mard4/vital-mcp' as the uvx --from value "
+    "(or pip install \"vital-mcp[render]\"), then restart the server.")
 
 
 class RenderError(RuntimeError):
@@ -95,8 +103,7 @@ def _engine():
         try:
             import dawdreamer
         except ImportError as exc:
-            raise RenderError('Rendering needs DawDreamer: install with "vital-mcp[render]" '
-                              '(pip install "vital-mcp[render]")') from exc
+            raise RenderError(MISSING_DAWDREAMER) from exc
         engine = dawdreamer.RenderEngine(SAMPLE_RATE, BLOCK_SIZE)
         synth = engine.make_plugin_processor("vital", str(path))
         _ENGINE.update(path=path, engine=engine, synth=synth)
@@ -256,6 +263,9 @@ def render(preset, notes="riff", bpm=120.0, tail=DEFAULT_TAIL, transpose=0):
     if seconds > MAX_SECONDS:
         raise ValueError(f"Render would be {seconds:.1f} s; keep it under {MAX_SECONDS:g} s")
 
+    if importlib.util.find_spec("dawdreamer") is None:
+        raise RenderError(MISSING_DAWDREAMER)
+    plugin_path()
     audio = _run_in_worker(_play, preset, events, bpm, seconds)
     info = {"bpm": bpm, "notes": len(events), "notes_end_sec": round(played, 2),
             "first_note_sec": round(min(e[1] for e in events) * beat, 3),

@@ -2,9 +2,9 @@
   "manifest_version": "0.4",
   "name": "vital-mcp",
   "display_name": "Vital Synth",
-  "version": "0.2.0",
-  "description": "Design, edit, explain and listen to presets for the Vital wavetable synth.",
-  "long_description": "Create and edit Vital presets in plain language: oscillators, wavetables, filters, envelopes, LFOs, the modulation matrix, macros and effects, with every parameter in friendly units. Presets are saved to Vital's User/Presets/MCP folder. With Vital's VST3 installed, presets can also be rendered offline through the real plugin and analyzed (levels, tonal balance, stereo width, attack and tail), so the assistant can check how a sound turned out.",
+  "version": "0.2.1",
+  "description": "Design, edit and explain presets for the Vital wavetable synth.",
+  "long_description": "Create and edit Vital presets in plain language: oscillators, wavetables, filters, envelopes, LFOs, the modulation matrix, macros and effects, with every parameter in friendly units. Presets are saved to Vital's User/Presets/MCP folder. To also render presets through the Vital plugin and analyze how they sound, install vital-mcp-render.mcpb instead.",
   "author": {
     "name": "Mardeen",
     "url": "https://github.com/mard4"
@@ -15,16 +15,28 @@
   },
   "homepage": "https://github.com/mard4/vital-mcp",
   "license": "GPL-3.0-or-later",
-  "keywords": ["vital", "synth", "synthesizer", "presets", "sound design", "music", "audio"],
+  "keywords": [
+    "vital",
+    "synth",
+    "synthesizer",
+    "presets",
+    "sound design",
+    "music",
+    "audio"
+  ],
   "server": {
     "type": "uv",
     "entry_point": "vital_mcp/server.py",
     "mcp_config": {
       "command": "uv",
-      "args": ["run", "--directory", "${__dirname}", "--extra", "render", "vital-mcp"],
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "vital-mcp"
+      ],
       "env": {
-        "VITAL_DATA_DIR": "${user_config.vital_data_dir}",
-        "VITAL_PLUGIN_PATH": "${user_config.vital_plugin_path}"
+        "VITAL_DATA_DIR": "${user_config.vital_data_dir}"
       }
     }
   },
@@ -34,26 +46,48 @@
       "title": "Vital folder (optional)",
       "description": "Vital's data folder. Leave empty to find it automatically (usually Music/Vital on macOS, Documents/Vital on Windows).",
       "required": false
-    },
-    "vital_plugin_path": {
-      "type": "file",
-      "title": "Vital.vst3 (optional)",
-      "description": "Only needed for rendering if Vital's VST3 isn't in the standard plugin folder.",
-      "required": false
     }
   },
   "tools": [
-    {"name": "list_presets", "description": "Search the presets in your Vital folder"},
-    {"name": "describe_preset", "description": "Readable breakdown of a preset: oscillators, wavetables, filters, envelopes, LFOs, modulation, macros, effects"},
-    {"name": "get_preset_parameters", "description": "Exact parameter values in display units"},
-    {"name": "list_parameters", "description": "Look up Vital parameter names, ranges, defaults and options"},
-    {"name": "create_preset", "description": "Build and save a new preset"},
-    {"name": "edit_preset", "description": "Change an existing preset in place (with backup) or as a copy"},
-    {"name": "compare_presets", "description": "Diff two presets"},
-    {"name": "render_preset", "description": "Play a preset through the Vital plugin offline, save a WAV and analyze the sound"}
+    {
+      "name": "list_presets",
+      "description": "Search the presets in your Vital folder"
+    },
+    {
+      "name": "describe_preset",
+      "description": "Readable breakdown of a preset: oscillators, wavetables, filters, envelopes, LFOs, modulation, macros, effects"
+    },
+    {
+      "name": "get_preset_parameters",
+      "description": "Exact parameter values in display units"
+    },
+    {
+      "name": "list_parameters",
+      "description": "Look up Vital parameter names, ranges, defaults and options"
+    },
+    {
+      "name": "create_preset",
+      "description": "Build and save a new preset"
+    },
+    {
+      "name": "edit_preset",
+      "description": "Change an existing preset in place (with backup) or as a copy"
+    },
+    {
+      "name": "compare_presets",
+      "description": "Diff two presets"
+    },
+    {
+      "name": "render_preset",
+      "description": "Play a preset through the Vital plugin offline, save a WAV and analyze the sound (needs the rendering bundle, vital-mcp-render.mcpb)"
+    }
   ],
   "compatibility": {
-    "platforms": ["darwin", "win32", "linux"],
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
     "runtimes": {
       "python": ">=3.10"
     }
