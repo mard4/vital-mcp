@@ -33,24 +33,27 @@ Values outside a parameter's range are clamped and reported, and typos get sugge
 
 ## Install
 
-Requires [uv](https://docs.astral.sh/uv/) and Vital 1.5 or newer.
+Requires [uv](https://docs.astral.sh/uv/) and Vital 1.5 or newer. No clone needed:
+`uvx` downloads and runs the server straight from GitHub.
 
-```bash
-git clone https://github.com/mard4/vital-mcp.git
-```
-
-Add it to any MCP client as a stdio server. The usual JSON config looks like this:
+Add it to your MCP client's config:
 
 ```json
 {
   "mcpServers": {
     "vital": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/vital-mcp", "run", "vital-mcp"]
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/mard4/vital-mcp", "vital-mcp"]
     }
   }
 }
 ```
+
+Your Vital folder is found automatically (see below). To pick up a new version, run
+`uvx --refresh --from git+https://github.com/mard4/vital-mcp vital-mcp` once.
+
+For development, clone the repo and point the client at your checkout instead:
+`"command": "uv", "args": ["--directory", "/path/to/vital-mcp", "run", "vital-mcp"]`.
 
 ## Where files go
 
