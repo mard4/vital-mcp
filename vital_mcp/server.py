@@ -1,6 +1,7 @@
 """MCP server for designing and editing Vital synth presets."""
 
 import functools
+from pathlib import Path
 from typing import Any
 
 from mcp.server.mcpserver import MCPServer
@@ -8,6 +9,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 
 from . import params as P
 from . import preset as V
+from . import render as R
 
 INSTRUCTIONS = """
 Design, edit and inspect presets for the Vital wavetable synth by writing .vital files.
@@ -31,6 +33,11 @@ Sound-design notes:
 - Unison: osc_N_unison_voices (1-16), osc_N_unison_detune, osc_N_stereo_spread.
 - Name macros (macro_names) and route macro_control_N to the main expressive targets.
 - Keep volume around -6 dB to -3 dB; big unison stacks and resonance get loud.
+
+Listening: render_preset plays notes through the real Vital plugin offline and returns
+levels, tonal balance, stereo image and envelope timing. Use it after creating or editing
+a preset to check the result, and iterate (too dark -> open the filter, re-render).
+Pass a reference .wav to compare against a target sound.
 """
 
 mcp = MCPServer("vital", instructions=INSTRUCTIONS)
@@ -42,7 +49,7 @@ def tool(fn):
     def wrapper(*args, **kwargs):
         try:
             return fn(*args, **kwargs)
-        except (ValueError, KeyError, OSError) as exc:
+        except (ValueError, KeyError, OSError, R.RenderError) as exc:
             raise ToolError(str(exc)) from exc
     return mcp.tool()(wrapper)
 
@@ -216,6 +223,45 @@ def compare_presets(preset_a: str, preset_b: str) -> str:
     changes = V.diff(a, b)
     header = f"A: {path_a}\nB: {path_b}\n{len(changes)} difference(s)"
     return header + ("\n" + "\n".join(f"- {c}" for c in changes) if changes else "")
+
+
+@tool
+def render_preset(
+    preset: str,
+    notes: str | list[dict[str, Any]] = "riff",
+    bpm: float = 120.0,
+    tail: float = R.DEFAULT_TAIL,
+    transpose: int = 0,
+    reference: str | None = None,
+    out_path: str | None = None,
+) -> dict:
+    """Play a preset through Vital offline, save a WAV and describe how it sounds.
+
+    notes: a pattern ("riff", "note", "chord", "bass", "pluck"; around C4, bass around C2)
+      or a list like [{"note": "E4", "start": 0, "length": 0.5, "velocity": 100}, ...]
+      with start/length in beats at bpm.
+    tail: seconds rendered after the last note-off (release, delay, reverb).
+    transpose: semitones added to every note, e.g. -12 to hear a pattern an octave down.
+    reference: path to a WAV (16/24/32-bit PCM) to compare tonal balance and levels against.
+    out_path: where to save the WAV; by default a temp folder (vital-mcp/renders).
+
+    Returns the WAV path plus: peak/RMS dBFS, clipping, crest factor, stereo correlation,
+    side/mid, energy per band (sub..air, %), spectral centroid and rolloff, attack_ms,
+    sustain_level_pct and tail_sec.
+    """
+    data, path = V.load(preset)
+    audio, events, info = R.render(data, notes, bpm, tail, transpose)
+    wav = R.write_wav(audio, R.output_path(data.get("preset_name") or path.stem, out_path))
+    result = {"wav": str(wav), "preset": str(path),
+              "played": f"{info['notes']} note(s) at {bpm:g} BPM, MIDI {min(e[0] for e in events)}-"
+                        f"{max(e[0] for e in events)}, notes end at {info['notes_end_sec']} s",
+              "analysis": R.analyze(audio, R.SAMPLE_RATE, info)}
+    if reference:
+        ref_audio, rate = R.read_wav(Path(reference).expanduser())
+        ref_stats = R.analyze(ref_audio, rate)
+        result["reference"] = {"path": reference, "analysis": ref_stats,
+                               "render_minus_reference": R.compare(result["analysis"], ref_stats)}
+    return result
 
 
 def main():

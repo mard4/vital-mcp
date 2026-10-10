@@ -3,9 +3,6 @@
 An MCP server that lets AI assistants (any MCP client) design, edit and explain presets for
 the free [Vital](https://vital.audio) wavetable synth.
 
-Vital presets are plain JSON, and Vital's source is open, so every parameter name, range
-and unit here comes straight from Vital's own parameter table. No reverse engineering.
-
 > "Make a dark reese bass with two detuned saws, a ladder filter at 400 Hz and a slow LFO on the cutoff. Put the LFO rate on macro 1."
 
 ## Tools
@@ -19,6 +16,7 @@ and unit here comes straight from Vital's own parameter table. No reverse engine
 | `create_preset` | Build a preset from the init patch or an existing preset |
 | `edit_preset` | Change parameters, modulations, wavetables or LFO shapes, in place (with backup) or as a copy |
 | `compare_presets` | Diff two presets |
+| `render_preset` | Play a preset through the real Vital plugin offline, save a WAV and describe the sound (optional, see below) |
 
 ### What you can set
 - **All ~800 parameters** in friendly units: `"filter_1_cutoff": "1.2 kHz"`, `"env_1_release": "800 ms"`,
@@ -63,11 +61,28 @@ For development, clone the repo and point the client at your checkout instead:
   After an edit, reselect the preset in Vital to reload it.
 - Overwritten presets are backed up to `User/.vital-mcp-backups/`.
 
+## Listening to presets (optional)
+
+`render_preset` loads the preset into the Vital plugin with
+[DawDreamer](https://github.com/DBraun/DawDreamer), plays a note pattern (`riff`, `note`,
+`chord`, `bass`, `pluck` or your own notes) and returns the WAV path plus numbers the model
+can act on: peak/RMS, clipping, stereo width, energy per band, spectral centroid, attack,
+sustain and tail length. Pass `reference` with a WAV to compare against a target sound.
+No DAW or audio routing needed, and it runs faster than real time.
+
+It needs the Vital VST3 installed and the `render` extra:
+
+```json
+"args": ["--from", "vital-mcp[render] @ git+https://github.com/mard4/vital-mcp", "vital-mcp"]
+```
+
+The plugin is found in the standard VST3 folders; override with `VITAL_PLUGIN_PATH`.
+Renders go to a temp folder (`vital-mcp/renders`) unless you pass `out_path`.
+
 ## Limits
 
 - This writes files. It doesn't control a running Vital instance, so there's no live
-  knob-turning and no audio rendering. Pair it with a DAW MCP (for example an Ableton MCP)
-  to load and audition patches.
+  knob-turning. Pair it with a DAW MCP (for example an Ableton MCP) for that.
 - Samples (the SMP oscillator) and the wavetable editor's file and line sources are kept
   as they are but can't be generated.
 
@@ -75,6 +90,7 @@ For development, clone the repo and point the client at your checkout instead:
 
 ```bash
 uv run pytest            # tests; also parses every preset in your Vital folder
+uv sync --extra render   # include DawDreamer so the real-plugin render test runs
 uv run python tools/gen_schema.py   # regenerate schema.json from Vital's GitHub source
 ```
 
