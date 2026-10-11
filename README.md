@@ -35,6 +35,58 @@ The preset it made, opened in Vital inside Ableton (click to watch with sound):
 
 Values outside a parameter's range are clamped and reported, and typos get suggestions.
 
+## Listening to presets (optional)
+
+![render_preset playing a preset, measuring it, then measuring again after a fix](docs/listen.gif)
+
+An AI model can't hear, so on its own it designs presets blind. `render_preset` gives it ears:
+it plays the preset through the real Vital plugin, saves a WAV you can listen to, and measures
+the sound so the model can judge the result and fix it by itself. It runs offline and faster
+than real time, with no DAW and no audio routing.
+
+**What it measures**
+
+| Reading | What it tells the model |
+|---|---|
+| Peak and RMS level, clipping | Is it too loud, is it distorting, is there headroom left for mixing? |
+| Spectral centroid and rolloff | How bright or dark it sounds |
+| Energy per band (sub, low, low-mid, mid, high, air) | Where the sound sits: boomy, muddy, thin or harsh |
+| Stereo correlation and side/mid ratio | Mono, wide, or so wide it falls apart in mono |
+| Attack, sustain level, tail length | Plucky or soft, sustained or short, how long the delay and reverb ring |
+
+**The loop: create, listen, fix, listen again.** In the demo at the top, the first render of
+the Blinding Lights lead came back at 999 Hz with peaks at -1.5 dB: dull and close to clipping.
+Claude opened the filter from 2.2 to 4.5 kHz and lowered the volume by 3 dB, and the second
+render read 1213 Hz and -7.5 dB.
+
+You don't need to ask for numbers. Plain requests work: *"listen to it and fix anything that
+sounds off"*, *"make it brighter and check it"*, *"does it clip?"*.
+
+**Options**
+- `notes`: what gets played. A pattern (`riff`, `note`, `chord`, `bass`, `pluck`) or your own
+  notes, plus `bpm`, `transpose` and `tail` (seconds rendered after the last note, for release,
+  delay and reverb).
+- `reference`: a WAV of a sound you want to match. The reply compares tonal balance and levels
+  against it.
+
+**Turning it on.** It's optional because it installs [DawDreamer](https://github.com/DBraun/DawDreamer)
+(about 130 MB) and needs Vital's VST3 installed. To turn it on:
+
+- **Claude Desktop:** install
+  [`vital-mcp-render.mcpb`](https://github.com/mard4/vital-mcp/releases/latest/download/vital-mcp-render.mcpb)
+  instead of `vital-mcp.mcpb`.
+- **Everything else:** use `"vital-mcp[render] @ git+https://github.com/mard4/vital-mcp"` as the
+  `--from` value in the [install commands](#install) below. For example, in Claude Code:
+
+  ```bash
+  claude mcp add -s user vital -- uvx --from "vital-mcp[render] @ git+https://github.com/mard4/vital-mcp" vital-mcp
+  ```
+
+Without it, the other tools work as usual and `render_preset` explains how to enable it.
+
+The plugin is found in the standard VST3 folders; override with `VITAL_PLUGIN_PATH`.
+Renders go to a temp folder (`vital-mcp/renders`) unless you pass `out_path`.
+
 ## Install
 
 You need Vital 1.5 or newer. For rendering (`render_preset`), Vital's VST3 must be installed too.
@@ -105,31 +157,6 @@ For development, clone the repo and point the client at your checkout:
   After an edit, reselect the preset in Vital to reload it.
 - Overwritten presets are backed up to `User/.vital-mcp-backups/`.
 
-## Listening to presets (optional)
-
-`render_preset` loads the preset into the Vital plugin with
-[DawDreamer](https://github.com/DBraun/DawDreamer), plays a note pattern (`riff`, `note`,
-`chord`, `bass`, `pluck` or your own notes) and returns the WAV path plus numbers the model
-can act on: peak/RMS, clipping, stereo width, energy per band, spectral centroid, attack,
-sustain and tail length. Pass `reference` with a WAV to compare against a target sound.
-No DAW or audio routing needed, and it runs faster than real time.
-
-It's optional because it installs [DawDreamer](https://github.com/DBraun/DawDreamer)
-(about 130 MB) and needs Vital's VST3 installed. To turn it on:
-
-- **Claude Desktop:** install `vital-mcp-render.mcpb` instead of `vital-mcp.mcpb`.
-- **Everything else:** use `"vital-mcp[render] @ git+https://github.com/mard4/vital-mcp"` as the `--from` value in the commands
-  above. For example, in Claude Code:
-
-  ```bash
-  claude mcp add -s user vital -- uvx --from "vital-mcp[render] @ git+https://github.com/mard4/vital-mcp" vital-mcp
-  ```
-
-Without it, the other tools work as usual and `render_preset` explains how to enable it.
-
-The plugin is found in the standard VST3 folders; override with `VITAL_PLUGIN_PATH`.
-Renders go to a temp folder (`vital-mcp/renders`) unless you pass `out_path`.
-
 ## Limits
 
 - This writes files. It doesn't control a running Vital instance, so there's no live
@@ -146,6 +173,7 @@ uv run python tools/build_mcpb.py   # build both Claude Desktop extensions into 
 uv run python tools/gen_schema.py   # regenerate schema.json from Vital's GitHub source
 uv run --no-project --with pillow python tools/make_demo_gif.py [render.wav]   # redraw docs/demo.gif
 uv run --no-project --with pillow python tools/make_desktop_gif.py [first.wav second.wav]   # docs/demo-desktop.gif
+uv run --no-project --with pillow python tools/make_listen_gif.py [first.wav second.wav]    # docs/listen.gif
 ```
 
 ## License
