@@ -8,4 +8,3 @@ dist/
 
 # Local video renders (not committed)
 docs/*.mp4
-!docs/ableton-vital.mp4
