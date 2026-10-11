@@ -5,6 +5,10 @@ the free [Vital](https://vital.audio) wavetable synth.
 
 > "Make a dark reese bass with two detuned saws, a ladder filter at 400 Hz and a slow LFO on the cutoff. Put the LFO rate on macro 1."
 
+Watch the video (click to play on YouTube):
+
+[![Designing synth sounds with AI: describe a sound, get a Vital preset](docs/thumbnail.png)](https://www.youtube.com/watch?v=BvKkD2rFqdE)
+
 ![Claude Desktop building a Blinding Lights style lead: create, listen, fix, listen again](docs/demo-desktop.gif)
 
 The preset it made, opened in Vital inside Ableton (click to watch with sound):
