@@ -1,19 +1,13 @@
 # vital-mcp
 
-An MCP server that lets AI assistants (any MCP client) design, edit and explain presets for
+MCP server that lets AI assistants (any MCP client) design, edit and explain presets for
 the free [Vital](https://vital.audio) wavetable synth.
 
-> "Make a dark reese bass with two detuned saws, a ladder filter at 400 Hz and a slow LFO on the cutoff. Put the LFO rate on macro 1."
-
-Watch the video (click to play on YouTube):
+## Watch the video (click to play on YouTube):
 
 [![Designing synth sounds with AI: describe a sound, get a Vital preset](docs/thumbnail.png)](https://www.youtube.com/watch?v=BvKkD2rFqdE)
 
 ![Claude Desktop building a Blinding Lights style lead: create, listen, fix, listen again](docs/demo-desktop.gif)
-
-The preset it made, opened in Vital inside Ableton (click to watch with sound):
-
-[![Blinding Lead playing in Vital inside Ableton](docs/ableton-vital.jpg)](docs/ableton-vital.mp4)
 
 **Contents**
 - **[Install](#install)**: [Claude Desktop](#claude-desktop-one-click) ·
@@ -178,18 +172,6 @@ For development, clone the repo and point the client at your checkout:
   knob-turning. Pair it with a DAW MCP (for example an Ableton MCP) for that.
 - Samples (the SMP oscillator) and the wavetable editor's file and line sources are kept
   as they are but can't be generated.
-
-## Development
-
-```bash
-uv run pytest            # tests; also parses every preset in your Vital folder
-uv sync --extra render   # include DawDreamer so the real-plugin render test runs
-uv run python tools/build_mcpb.py   # build both Claude Desktop extensions into dist/
-uv run python tools/gen_schema.py   # regenerate schema.json from Vital's GitHub source
-uv run --no-project --with pillow python tools/make_demo_gif.py [render.wav]   # redraw docs/demo.gif
-uv run --no-project --with pillow python tools/make_desktop_gif.py [first.wav second.wav]   # docs/demo-desktop.gif
-uv run --no-project --with pillow python tools/make_listen_gif.py [first.wav second.wav]    # docs/listen.gif
-```
 
 ## License
 
