@@ -11,6 +11,15 @@ The preset it made, opened in Vital inside Ableton (click to watch with sound):
 
 [![Blinding Lead playing in Vital inside Ableton](docs/ableton-vital.jpg)](docs/ableton-vital.mp4)
 
+**Contents**
+- **[Install](#install)**: [Claude Desktop](#claude-desktop-one-click) ·
+  [Claude Code, Codex, VS Code](#agents-with-a-cli-one-command) ·
+  [Cursor, Windsurf, Gemini CLI and others](#any-other-mcp-client-cursor-windsurf-gemini-cli-)
+- **[Install with listening](#install-with-listening)**: let the model hear its presets
+- [Tools](#tools) · [What you can set](#what-you-can-set)
+- [Listening to presets](#listening-to-presets-optional): what it measures and how the model uses it
+- [Where files go](#where-files-go) · [Limits](#limits) · [Development](#development)
+
 ## Tools
 
 | Tool | What it does |
@@ -69,7 +78,9 @@ sounds off"*, *"make it brighter and check it"*, *"does it clip?"*.
 - `reference`: a WAV of a sound you want to match. The reply compares tonal balance and levels
   against it.
 
-**Turning it on.** It's optional because it installs [DawDreamer](https://github.com/DBraun/DawDreamer)
+### Install with listening
+
+Listening is optional because it installs [DawDreamer](https://github.com/DBraun/DawDreamer)
 (about 130 MB) and needs Vital's VST3 installed. To turn it on:
 
 - **Claude Desktop:** install
