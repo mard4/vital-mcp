@@ -5,7 +5,7 @@ the free [Vital](https://vital.audio) wavetable synth.
 
 ## Watch the video (click to play on YouTube):
 
-[![Designing synth sounds with AI: describe a sound, get a Vital preset](docs/thumbnail.png)](https://www.youtube.com/watch?v=BvKkD2rFqdE)
+[![Designing synth sounds with AI: describe a sound, get a Vital preset](docs/video-thumbnail.png)](https://www.youtube.com/watch?v=BvKkD2rFqdE)
 
 ![Claude Desktop building a Blinding Lights style lead: create, listen, fix, listen again](docs/demo-desktop.gif)
 

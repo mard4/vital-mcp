@@ -4,3 +4,8 @@ __pycache__/
 .pytest_cache/
 *.mcpb
 dist/
+.DS_Store
+
+# Local video renders (not committed)
+docs/*.mp4
+!docs/ableton-vital.mp4
