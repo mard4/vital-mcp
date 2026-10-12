@@ -111,9 +111,7 @@ of the two.
 ### Agents with a CLI: one command
 
 These need [uv](https://docs.astral.sh/uv/). `uvx` downloads and runs the server
-straight from GitHub, no clone needed.
-
-![The same session in a terminal, with the raw tool calls](docs/demo.gif)
+straight from GitHub
 
 **Claude Code**
 ```bash
