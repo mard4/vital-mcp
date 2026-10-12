@@ -3,7 +3,7 @@
 MCP server that lets AI assistants (any MCP client) design, edit and explain presets for
 the free [Vital](https://vital.audio) wavetable synth.
 
-[![Designing synth sounds with AI: describe a sound, get a Vital preset](docs/video-thumbnail.png)](https://www.youtube.com/watch?v=BvKkD2rFqdE)
+[![Designing synth sounds with AI: describe a sound, get a Vital preset](docs/video-thumbnail.png)](https://www.youtube.com/shorts/TID3M6f5g2Y)
 
 **Contents**
 - **[Install](#install)**: [Claude Desktop](#claude-desktop-one-click) ·
