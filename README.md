@@ -14,30 +14,6 @@ the free [Vital](https://vital.audio) wavetable synth.
 - [Listening to presets](#listening-to-presets-optional): what it measures and how the model uses it
 - [Where files go](#where-files-go) · [Limits](#limits) · [Development](#development)
 
-## Tools
-
-| Tool | What it does |
-|---|---|
-| `list_presets` | Search the presets in your Vital folder |
-| `describe_preset` | Readable breakdown: oscillators, wavetables, filters, envelopes, LFOs, mod matrix, macros, FX |
-| `get_preset_parameters` | Exact values in display units (Hz, ms, dB, %) |
-| `list_parameters` | Look up parameter names, ranges, defaults and menu options |
-| `create_preset` | Build a preset from the init patch or an existing preset |
-| `edit_preset` | Change parameters, modulations, wavetables or LFO shapes, in place (with backup) or as a copy |
-| `compare_presets` | Diff two presets |
-| `render_preset` | Play a preset through the real Vital plugin offline, save a WAV and describe the sound (optional, see below) |
-
-### What you can set
-- **All ~800 parameters** in friendly units: `"filter_1_cutoff": "1.2 kHz"`, `"env_1_release": "800 ms"`,
-  `"reverb_dry_wet": "25%"`, `"filter_1_model": "Ladder"`, `"lfo_1_tempo": "1/8"`.
-- **Modulation matrix**: `{"source": "lfo_1", "destination": "filter_1_cutoff", "amount": 0.35}`.
-- **Wavetables**: basic shapes, additive harmonics, mixes, drive/fold, and morphing tables
-  (`{"morph": ["saw", {"shape": "square", "drive": 3}], "steps": 8}`).
-- **LFO shapes**: sine, triangle, saw, square, ramps or custom points with curve powers.
-- **Metadata**: name, style, author, comments, macro labels.
-
-Values outside a parameter's range are clamped and reported, and typos get suggestions.
-
 ## Listening to presets (optional)
 
 ![render_preset playing a preset, measuring it, then measuring again after a fix](docs/listen.gif)
@@ -46,31 +22,6 @@ An AI model can't hear, so on its own it designs presets blind. `render_preset` 
 it plays the preset through the real Vital plugin, saves a WAV you can listen to, and measures
 the sound so the model can judge the result and fix it by itself. It runs offline and faster
 than real time, with no DAW and no audio routing.
-
-**What it measures**
-
-| Reading | What it tells the model |
-|---|---|
-| Peak and RMS level, clipping | Is it too loud, is it distorting, is there headroom left for mixing? |
-| Spectral centroid and rolloff | How bright or dark it sounds |
-| Energy per band (sub, low, low-mid, mid, high, air) | Where the sound sits: boomy, muddy, thin or harsh |
-| Stereo correlation and side/mid ratio | Mono, wide, or so wide it falls apart in mono |
-| Attack, sustain level, tail length | Plucky or soft, sustained or short, how long the delay and reverb ring |
-
-**The loop: create, listen, fix, listen again.** In the demo at the top, the first render of
-the Blinding Lights lead came back at 999 Hz with peaks at -1.5 dB: dull and close to clipping.
-Claude opened the filter from 2.2 to 4.5 kHz and lowered the volume by 3 dB, and the second
-render read 1213 Hz and -7.5 dB.
-
-You don't need to ask for numbers. Plain requests work: *"listen to it and fix anything that
-sounds off"*, *"make it brighter and check it"*, *"does it clip?"*.
-
-**Options**
-- `notes`: what gets played. A pattern (`riff`, `note`, `chord`, `bass`, `pluck`) or your own
-  notes, plus `bpm`, `transpose` and `tail` (seconds rendered after the last note, for release,
-  delay and reverb).
-- `reference`: a WAV of a sound you want to match. The reply compares tonal balance and levels
-  against it.
 
 ### Install with listening
 
@@ -166,6 +117,56 @@ For development, clone the repo and point the client at your checkout:
   knob-turning. Pair it with a DAW MCP (for example an Ableton MCP) for that.
 - Samples (the SMP oscillator) and the wavetable editor's file and line sources are kept
   as they are but can't be generated.
+
+# Details
+## Tools
+
+| Tool | What it does |
+|---|---|
+| `list_presets` | Search the presets in your Vital folder |
+| `describe_preset` | Readable breakdown: oscillators, wavetables, filters, envelopes, LFOs, mod matrix, macros, FX |
+| `get_preset_parameters` | Exact values in display units (Hz, ms, dB, %) |
+| `list_parameters` | Look up parameter names, ranges, defaults and menu options |
+| `create_preset` | Build a preset from the init patch or an existing preset |
+| `edit_preset` | Change parameters, modulations, wavetables or LFO shapes, in place (with backup) or as a copy |
+| `compare_presets` | Diff two presets |
+| `render_preset` | Play a preset through the real Vital plugin offline, save a WAV and describe the sound (optional, see below) |
+
+### What you can set
+- **All ~800 parameters** in friendly units: `"filter_1_cutoff": "1.2 kHz"`, `"env_1_release": "800 ms"`,
+  `"reverb_dry_wet": "25%"`, `"filter_1_model": "Ladder"`, `"lfo_1_tempo": "1/8"`.
+- **Modulation matrix**: `{"source": "lfo_1", "destination": "filter_1_cutoff", "amount": 0.35}`.
+- **Wavetables**: basic shapes, additive harmonics, mixes, drive/fold, and morphing tables
+  (`{"morph": ["saw", {"shape": "square", "drive": 3}], "steps": 8}`).
+- **LFO shapes**: sine, triangle, saw, square, ramps or custom points with curve powers.
+- **Metadata**: name, style, author, comments, macro labels.
+
+Values outside a parameter's range are clamped and reported, and typos get suggestions.
+
+**What it measures**
+
+| Reading | What it tells the model |
+|---|---|
+| Peak and RMS level, clipping | Is it too loud, is it distorting, is there headroom left for mixing? |
+| Spectral centroid and rolloff | How bright or dark it sounds |
+| Energy per band (sub, low, low-mid, mid, high, air) | Where the sound sits: boomy, muddy, thin or harsh |
+| Stereo correlation and side/mid ratio | Mono, wide, or so wide it falls apart in mono |
+| Attack, sustain level, tail length | Plucky or soft, sustained or short, how long the delay and reverb ring |
+
+**The loop: create, listen, fix, listen again.** In the demo at the top, the first render of
+the Blinding Lights lead came back at 999 Hz with peaks at -1.5 dB: dull and close to clipping.
+Claude opened the filter from 2.2 to 4.5 kHz and lowered the volume by 3 dB, and the second
+render read 1213 Hz and -7.5 dB.
+
+You don't need to ask for numbers. Plain requests work: *"listen to it and fix anything that
+sounds off"*, *"make it brighter and check it"*, *"does it clip?"*.
+
+**Options**
+- `notes`: what gets played. A pattern (`riff`, `note`, `chord`, `bass`, `pluck`) or your own
+  notes, plus `bpm`, `transpose` and `tail` (seconds rendered after the last note, for release,
+  delay and reverb).
+- `reference`: a WAV of a sound you want to match. The reply compares tonal balance and levels
+  against it.
 
 ## License
 
