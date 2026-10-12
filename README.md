@@ -45,6 +45,8 @@ Renders go to a temp folder (`vital-mcp/renders`) unless you pass `out_path`.
 
 ## Install
 
+<img src="docs/install.gif" width="480" alt="Installing vital-mcp with one command in Claude Code, Codex and VS Code">
+
 You need Vital 1.5 or newer. For rendering (`render_preset`), Vital's VST3 must be installed too.
 
 ### Claude Desktop: one click
