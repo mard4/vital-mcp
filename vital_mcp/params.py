@@ -127,6 +127,7 @@ def to_display(name, raw, settings=None):
     return f"{text} {units}".strip()
 
 
+_TEMPO_FEEL = re.compile(r"^\s*(\d+/\d+)\s*(d|dot|dotted|\.|t|trip|triplets?)\s*$", re.I)
 _NUMBER_UNIT = re.compile(r"^\s*(-?[0-9]*\.?[0-9]+(?:e-?\d+)?)\s*(k?hz|khz|k|ms|s|secs?|seconds?|%|db|st|semitones?|cents?)?\s*$", re.I)
 
 
@@ -157,6 +158,12 @@ def from_user(name, value, settings=None):
         elif _NUMBER_UNIT.match(value):
             raw = _parse_numeric(d, value)
         else:
+            feel = _TEMPO_FEEL.match(value) if name.endswith("_tempo") else None
+            if feel:
+                sync = name[:-len("tempo")] + "sync"
+                kind = "Tempo Triplets" if feel.group(2).lower().startswith("t") else "Tempo Dotted"
+                raise ParameterError(f"{name}: dotted/triplet values are set on {sync}; "
+                                     f"use {sync}='{kind}' and {name}='{feel.group(1)}'")
             raise ParameterError(f"{name}: '{value}' is not one of {options}")
     else:
         raw = _parse_numeric(d, value)

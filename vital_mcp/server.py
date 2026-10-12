@@ -28,6 +28,8 @@ Sound-design notes:
   spans ~8 Hz..21 kHz, so +0.3 is roughly +3 octaves.
 - LFO rate: lfo_N_sync ("Seconds", "Tempo", ...), then lfo_N_tempo ("1/4") or
   lfo_N_frequency (seconds per cycle). lfo_N_sync_type "Envelope" makes it one-shot.
+  Dotted/triplet times are a sync mode, not a tempo value: delay_sync "Tempo Dotted"
+  with delay_tempo "1/8" is a dotted eighth (same for lfo_N_sync).
 - Effects each have <fx>_on plus parameters: chorus, compressor, delay, distortion, eq,
   filter_fx, flanger, phaser, reverb. Wet amounts are <fx>_dry_wet or <fx>_mix.
 - Unison: osc_N_unison_voices (1-16), osc_N_unison_detune, osc_N_stereo_spread.
